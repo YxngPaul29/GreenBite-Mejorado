@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // Data layers
 import { migrateFromLegacy } from './lib/storage';
-import { initializeSeedData } from './lib/seedData';
 import { AuthProvider } from './lib/AuthContext';
 
 // Import pages
@@ -35,7 +34,6 @@ function App() {
 
   useEffect(() => {
     migrateFromLegacy();
-    initializeSeedData();
   }, []);
 
   return (
