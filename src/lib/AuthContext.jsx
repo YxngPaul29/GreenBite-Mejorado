@@ -65,6 +65,15 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password, tipo = 'paciente') => {
     const normalizedEmail = normalizeEmail(email);
 
+    console.log('[GreenBite Login Debug]', {
+      normalizedEmail,
+      tipo,
+      emailMatch: normalizedEmail === ADMIN_EMAIL,
+      passMatch: password === ADMIN_PASS,
+      passLength: password?.length,
+      expectedPassLength: ADMIN_PASS.length,
+    });
+
     // Admin login
     if (tipo === 'nutricionista' || tipo === 'admin') {
       if (normalizedEmail === ADMIN_EMAIL && password === ADMIN_PASS) {
