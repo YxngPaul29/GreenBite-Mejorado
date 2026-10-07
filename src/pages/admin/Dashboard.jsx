@@ -21,41 +21,45 @@ export default function Dashboard() {
   const [ingresosData, setIngresosData] = useState([]);
 
   useEffect(() => {
-    const pacientes = getPacientes();
-    const planes = getPlanes();
-    const cotizaciones = getCotizaciones();
-    const pagos = getPagos();
+    async function loadData() {
+      const pacientes = await getPacientes() || [];
+      const planes = await getPlanes() || [];
+      const cotizaciones = await getCotizaciones() || [];
+      const pagos = await getPagos() || [];
 
-    // Stats
-    const totalPagado = pagos.filter(p => p.estado === 'Pagado').reduce((acc, p) => acc + p.monto, 0);
-    setStats({
-      pacientesTotales: pacientes.length,
-      planesActivos: planes.filter(p => p.estado === 'Activo').length,
-      solicitudesPendientes: cotizaciones.filter(c => c.estado === 'Pendiente').length,
-      ingresosSimulados: totalPagado
-    });
+      // Stats
+      const totalPagado = pagos.filter(p => p.estado === 'Pagado').reduce((acc, p) => acc + p.monto, 0);
+      setStats({
+        pacientesTotales: pacientes.length,
+        planesActivos: planes.filter(p => p.estado === 'Activo').length,
+        solicitudesPendientes: cotizaciones.filter(c => c.estado === 'Pendiente').length,
+        ingresosSimulados: totalPagado
+      });
 
-    setRecentPacientes(pacientes.slice(0, 5));
-    setNotificaciones(getAdminNotificaciones().slice(0, 5));
+      setRecentPacientes(pacientes.slice(0, 5));
+      const notifs = await getAdminNotificaciones() || [];
+      setNotificaciones(notifs.slice(0, 5));
 
-    // Simulated revenue chart data based on last 6 months
-    const months = ['Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'];
-    const data = months.map(m => ({
-      name: m,
-      ingresos: Math.floor(Math.random() * 500) + 150, // Mock data based on months
-      pacientes: Math.floor(Math.random() * 15) + 5
-    }));
-    
-    // add real payments from this month
-    const currentMonthTotal = pagos
-      .filter(p => p.estado === 'Pagado' && new Date(p.fecha).getMonth() === new Date().getMonth())
-      .reduce((acc, p) => acc + p.monto, 0);
+      // Simulated revenue chart data based on last 6 months
+      const months = ['Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'];
+      const data = months.map(m => ({
+        name: m,
+        ingresos: Math.floor(Math.random() * 500) + 150, // Mock data based on months
+        pacientes: Math.floor(Math.random() * 15) + 5
+      }));
       
-    if (currentMonthTotal > 0) {
-      data[data.length - 1].ingresos = currentMonthTotal;
-    }
+      // add real payments from this month
+      const currentMonthTotal = pagos
+        .filter(p => p.estado === 'Pagado' && new Date(p.fecha).getMonth() === new Date().getMonth())
+        .reduce((acc, p) => acc + p.monto, 0);
+        
+      if (currentMonthTotal > 0) {
+        data[data.length - 1].ingresos = currentMonthTotal;
+      }
 
-    setIngresosData(data);
+      setIngresosData(data);
+    }
+    loadData();
   }, []);
 
   return (
