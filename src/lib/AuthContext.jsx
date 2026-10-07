@@ -1,9 +1,21 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
-  getCurrentUser, setCurrentUser, clearCurrentUser,
   getPacienteByEmail, createPaciente, getPacienteById,
   updatePaciente, normalizeEmail, changePassword as storageChangePassword,
 } from './storage.js';
+
+// Local storage session helpers
+const SESSION_KEY = 'gb_current_user';
+
+function getCurrentUser() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; }
+}
+function setCurrentUser(user) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+function clearCurrentUser() {
+  localStorage.removeItem(SESSION_KEY);
+}
 
 const AuthContext = createContext(null);
 
