@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
     };
   }, [user]);
 
-  const login = useCallback((email, password, tipo = 'paciente') => {
+  const login = useCallback(async (email, password, tipo = 'paciente') => {
     const normalizedEmail = normalizeEmail(email);
 
     // Admin login
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
     }
 
     // Patient login
-    const paciente = getPacienteByEmail(normalizedEmail);
+    const paciente = await getPacienteByEmail(normalizedEmail);
     if (!paciente) {
       return { success: false, error: 'No existe una cuenta con ese correo electrónico.' };
     }
@@ -92,7 +92,7 @@ export function AuthProvider({ children }) {
     return { success: true, user: sessionUser };
   }, []);
 
-  const register = useCallback((nombre, email, password) => {
+  const register = useCallback(async (nombre, email, password) => {
     const normalizedEmail = normalizeEmail(email);
 
     if (!nombre || nombre.trim().length < 2) {
@@ -106,7 +106,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const paciente = createPaciente({
+      const paciente = await createPaciente({
         nombre: nombre.trim(),
         email: normalizedEmail,
         password,
@@ -128,10 +128,10 @@ export function AuthProvider({ children }) {
     clearCurrentUser();
   }, []);
 
-  const changePassword = useCallback((currentPass, newPass) => {
+  const changePassword = useCallback(async (currentPass, newPass) => {
     if (!user) return { success: false, error: 'No hay sesión activa.' };
     try {
-      const updated = storageChangePassword(user.id, currentPass, newPass);
+      const updated = await storageChangePassword(user.id, currentPass, newPass);
       const sessionUser = { ...updated };
       delete sessionUser.password;
       setUser(sessionUser);
@@ -143,9 +143,9 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  const refreshUser = useCallback(() => {
+  const refreshUser = useCallback(async () => {
     if (!user || user.rol === 'admin') return;
-    const fresh = getPacienteById(user.id);
+    const fresh = await getPacienteById(user.id);
     if (fresh) {
       const sessionUser = { ...fresh };
       delete sessionUser.password;
@@ -154,10 +154,10 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  const updateProfile = useCallback((data) => {
+  const updateProfile = useCallback(async (data) => {
     if (!user || user.rol === 'admin') return { success: false, error: 'No permitido.' };
     try {
-      const updated = updatePaciente(user.id, data);
+      const updated = await updatePaciente(user.id, data);
       const sessionUser = { ...updated };
       delete sessionUser.password;
       setUser(sessionUser);
